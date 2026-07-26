@@ -195,8 +195,8 @@ const store = {
 };
  
 /* ============ JSONP (カーリルAPIをサーバーレスで直接叩く) ============ */
-/* callbackパラメータを付けると、カーリルはJSONPとして返してくれる。 */
-/* format=jsonは指定したらアカン(プレーンJSONになってscriptタグから実行できひんくなる)。 */
+/* callbackパラメータだけやとカーリルはデフォルトのXML形式のまま返してくるので、 */
+/* 必ずformat=jsonも一緒に指定して、JSON+JSONPとして返してもらう。 */
 let jsonpSeq = 0;
 function jsonp(url, params) {
   return new Promise((resolve, reject) => {
@@ -218,17 +218,17 @@ function jsonp(url, params) {
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
  
 async function calilLibrarySearch(appkey, pref, city) {
-  const params = { appkey, pref };
+  const params = { appkey, pref, format: 'json' };
   if (city) params.city = city;
   return jsonp('https://api.calil.jp/library', params);
 }
  
 async function calilCheck(appkey, isbn, systemids) {
-  let data = await jsonp('https://api.calil.jp/check', { appkey, isbn, systemid: systemids.join(',') });
+  let data = await jsonp('https://api.calil.jp/check', { appkey, isbn, systemid: systemids.join(','), format: 'json' });
   let polls = 0;
   while (data.continue === 1 && polls < 20) {
     await sleep(2200);
-    data = await jsonp('https://api.calil.jp/check', { session: data.session });
+    data = await jsonp('https://api.calil.jp/check', { session: data.session, format: 'json' });
     polls++;
   }
   return data.books || {};
@@ -251,6 +251,8 @@ function extractIsbn10(raw) {
 /* ============ UI: セクション1 APIキー ============ */
 const appkeyInput = document.getElementById('appkeyInput');
 const appkeyStatus = document.getElementById('appkeyStatus');
+const DEFAULT_APPKEY = '72b9f167d9cef58ead4bc9fc80ff9543';
+if (!store.getAppkey()) store.setAppkey(DEFAULT_APPKEY);
 appkeyInput.value = store.getAppkey();
  
 document.getElementById('saveAppkeyBtn').addEventListener('click', () => {
