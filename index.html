@@ -85,6 +85,21 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 58ch; line-h
 .btn.secondary:hover { background: #eaeaec; }
  
 .hint { font-size: 12px; color: var(--sub-faint); margin-top: 6px; line-height: 1.6; }
+ 
+.site-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 16px; }
+.site-tabs.hidden { display: none; }
+.site-tab {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 100px;
+  background: var(--bg-alt); border: 1px solid var(--line); color: var(--ink); text-decoration: none;
+  font-size: 12.5px; font-weight: 700; transition: background 0.15s, transform 0.1s, border-color 0.15s;
+}
+.site-tab:hover { background: #eaeaec; transform: translateY(-1px); }
+.site-tab .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.site-tab.tab-calil { background: var(--accent-dim); border-color: #a9cdf5; color: var(--accent); }
+.site-tab.tab-calil .dot { background: var(--accent); }
+.site-tab.tab-google .dot { background: #4285f4; }
+.site-tab.tab-amazon .dot { background: #ff9900; }
+.site-tab.tab-rakuten .dot { background: #bf0000; }
 .status-msg { font-size: 13px; margin-top: 10px; padding: 10px 14px; border-radius: 10px; }
 .status-msg.ok { background: #ebfbee; color: #2b6b34; }
 .status-msg.err { background: #fff0f0; color: #a32424; }
@@ -203,6 +218,7 @@ footer a { color: var(--sub); }
       <input type="text" id="bookInput" placeholder="例: 世界史 / 深読み世界史 / 4478024488">
       <button class="btn" id="searchBtn">検索</button>
     </div>
+    <div class="site-tabs hidden" id="siteTabs"></div>
     <div id="bookStatus" class="status-msg hidden"></div>
     <div class="results-grid" id="resultsGrid"></div>
   </section>
@@ -484,6 +500,30 @@ const bookInput = document.getElementById('bookInput');
 const searchBtn = document.getElementById('searchBtn');
 const bookStatus = document.getElementById('bookStatus');
 const resultsGrid = document.getElementById('resultsGrid');
+const siteTabs = document.getElementById('siteTabs');
+ 
+// 検索窓のキーワードそのままで、他サイトへ横断的に飛べるタブ(かつての拡張機能と同じ発想)
+function buildSiteTabs(keyword) {
+  const q = encodeURIComponent(keyword);
+  return [
+    { label: '図書館 (カーリル)', url: `https://api.calil.jp/openurl?rft.btitle=${q}`, cls: 'tab-calil' },
+    { label: 'Google', url: `https://www.google.com/search?q=${q}`, cls: 'tab-google' },
+    { label: 'Amazon', url: `https://www.amazon.co.jp/s?k=${q}`, cls: 'tab-amazon' },
+    { label: '楽天', url: `https://search.rakuten.co.jp/search/mall/${q}/`, cls: 'tab-rakuten' },
+  ];
+}
+function renderSiteTabs(keyword) {
+  siteTabs.innerHTML = '';
+  if (!keyword) { siteTabs.classList.add('hidden'); return; }
+  buildSiteTabs(keyword).forEach((t) => {
+    const a = document.createElement('a');
+    a.href = t.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.className = 'site-tab ' + t.cls;
+    a.innerHTML = `<span class="dot"></span>${t.label}`;
+    siteTabs.appendChild(a);
+  });
+  siteTabs.classList.remove('hidden');
+}
  
 function buildQuickLinksRow(title, isbn) {
   const row = document.createElement('div');
@@ -587,6 +627,7 @@ async function runSearch() {
   const keyword = bookInput.value.trim();
   if (!keyword) return;
  
+  renderSiteTabs(keyword);
   resultsGrid.innerHTML = '';
   bookStatus.className = 'status-msg ok';
   bookStatus.textContent = '検索中…';
