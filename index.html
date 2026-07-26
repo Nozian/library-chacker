@@ -6,7 +6,7 @@
 <title>図書館蔵書チェッカー — Nozian</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
- 
+
 :root {
   --bg: #ffffff;
   --bg-alt: #f5f5f7;
@@ -31,7 +31,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px 100px; }
- 
+
 nav.topnav {
   position: sticky; top: 0; z-index: 50;
   height: 52px; display: flex; align-items: center;
@@ -41,7 +41,7 @@ nav.topnav {
 nav.topnav a { color: var(--sub); text-decoration: none; font-size: 13.5px; font-weight: 500; }
 nav.topnav a:hover { color: var(--ink); }
 nav.topnav .wordmark { font-weight: 700; font-size: 15px; color: var(--ink); margin-left: auto; }
- 
+
 header.page-head {
   padding: 60px 0 40px; position: relative; overflow: hidden;
 }
@@ -57,7 +57,7 @@ header.page-head .eyebrow {
 }
 header.page-head h1 { font-size: clamp(1.9rem, 4.2vw, 2.7rem); font-weight: 800; letter-spacing: -0.025em; margin-bottom: 12px; }
 header.page-head p { color: var(--sub); font-size: 1rem; max-width: 58ch; line-height: 1.75; }
- 
+
 .card {
   background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
   padding: 26px 26px; margin-bottom: 22px; box-shadow: var(--shadow);
@@ -65,7 +65,7 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 58ch; line-h
 .card h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.015em; }
 .card .desc { color: var(--sub); font-size: 0.9rem; line-height: 1.65; margin-bottom: 18px; }
 .card .desc a { color: var(--accent); font-weight: 600; }
- 
+
 .field-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 .field-row input {
   flex: 1; min-width: 120px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px;
@@ -83,28 +83,23 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 58ch; line-h
 .btn:disabled { background: var(--sub-faint); cursor: not-allowed; transform: none; }
 .btn.secondary { background: var(--bg-alt); color: var(--ink); border: 1px solid var(--line); }
 .btn.secondary:hover { background: #eaeaec; }
- 
+
 .hint { font-size: 12px; color: var(--sub-faint); margin-top: 6px; line-height: 1.6; }
- 
-.site-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 16px; }
+
+.site-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 2px 0 16px; }
 .site-tabs.hidden { display: none; }
 .site-tab {
-  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 100px;
+  display: inline-flex; align-items: center; padding: 9px 18px; border-radius: 100px;
   background: var(--bg-alt); border: 1px solid var(--line); color: var(--ink); text-decoration: none;
-  font-size: 12.5px; font-weight: 700; transition: background 0.15s, transform 0.1s, border-color 0.15s;
+  font-size: 13px; font-weight: 600; transition: background 0.15s, transform 0.1s, border-color 0.15s;
 }
 .site-tab:hover { background: #eaeaec; transform: translateY(-1px); }
-.site-tab .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.site-tab.tab-calil { background: var(--accent-dim); border-color: #a9cdf5; color: var(--accent); }
-.site-tab.tab-calil .dot { background: var(--accent); }
-.site-tab.tab-google .dot { background: #4285f4; }
-.site-tab.tab-amazon .dot { background: #ff9900; }
-.site-tab.tab-rakuten .dot { background: #bf0000; }
+.site-tab.tab-calil { background: var(--accent-dim); border-color: #a9cdf5; color: var(--accent); font-weight: 700; }
 .status-msg { font-size: 13px; margin-top: 10px; padding: 10px 14px; border-radius: 10px; }
 .status-msg.ok { background: #ebfbee; color: #2b6b34; }
 .status-msg.err { background: #fff0f0; color: #a32424; }
 .status-msg.hidden { display: none; }
- 
+
 /* ============ 折りたたみ設定 ============ */
 details.settings {
   background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
@@ -126,7 +121,7 @@ details.settings summary .count-chip {
 .settings-section + .settings-section { margin-top: 4px; }
 .settings-section h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 6px; }
 .settings-section .desc { color: var(--sub); font-size: 0.85rem; line-height: 1.6; margin-bottom: 14px; }
- 
+
 .lib-list { list-style: none; margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .lib-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -144,7 +139,7 @@ details.settings summary .count-chip {
 .lib-row .remove-btn:hover { background: #fff0f0; }
 .lib-row .added-label { color: var(--sub-faint); font-size: 12px; }
 .empty-note { color: var(--sub-faint); font-size: 13px; padding: 6px 2px; }
- 
+
 /* ============ 検索結果グリッド ============ */
 .results-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px;
@@ -178,7 +173,7 @@ details.settings summary .count-chip {
 .book-check-btn:hover { background: #eaeaec; }
 .book-check-btn:disabled { color: var(--sub-faint); cursor: wait; }
 .book-avail { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
- 
+
 .avail-row {
   display: flex; align-items: center; gap: 8px; padding: 7px 10px;
   background: var(--bg-alt); border-radius: 8px; font-size: 11.5px;
@@ -192,25 +187,25 @@ details.settings summary .count-chip {
 .avail-status { font-size: 10.5px; color: var(--sub); white-space: nowrap; }
 .avail-row a.reserve { font-size: 10.5px; color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
 .avail-row a.reserve:hover { text-decoration: underline; }
- 
+
 footer { text-align: center; padding: 44px 24px; color: var(--sub-faint); font-size: 12.5px; }
 footer a { color: var(--sub); }
 </style>
 </head>
 <body>
- 
+
 <nav class="topnav">
   <a href="https://nozian.github.io/nozian-portfolio/">← ポートフォリオへ戻る</a>
   <span class="wordmark">図書館蔵書チェッカー · Web版</span>
 </nav>
- 
+
 <div class="wrap">
   <header class="page-head">
     <div class="eyebrow">Nozian Tools</div>
     <h1>図書館蔵書チェッカー</h1>
     <p>キーワードで本を探して、登録した図書館で借りられるかをその場でチェックできる単体ツール。Chrome拡張機能版と同じカーリルAPIを、このページから直接呼び出しとる。設定は全部このブラウザの中だけに保存されて外には送らへん。</p>
   </header>
- 
+
   <section class="card">
     <h2>本を探す</h2>
     <p class="desc">気になるキーワードで検索してみてや。関連する本が一覧で出てくるで(Google Books連携)。表紙をタップすると横断検索リンクと、登録図書館の貸出状況チェックボタンが出てくる。</p>
@@ -222,7 +217,7 @@ footer a { color: var(--sub); }
     <div id="bookStatus" class="status-msg hidden"></div>
     <div class="results-grid" id="resultsGrid"></div>
   </section>
- 
+
   <details class="settings" id="settingsDetails">
     <summary>
       <span>⚙️ 図書館の設定(APIキー・登録図書館)</span>
@@ -240,7 +235,7 @@ footer a { color: var(--sub); }
         <div class="hint">保存先はこのブラウザのlocalStorageのみ。どこにも送信されへん。</div>
         <div id="appkeyStatus" class="status-msg hidden"></div>
       </div>
- 
+
       <div class="settings-section">
         <h3>2. 図書館を探して登録</h3>
         <p class="desc">都道府県(必須)と市区町村(任意)で検索して、チェックしたい図書館を追加してや。</p>
@@ -251,14 +246,14 @@ footer a { color: var(--sub); }
         </div>
         <ul class="lib-list" id="searchResults"></ul>
       </div>
- 
+
       <div class="settings-section">
         <h3>3. 登録済みの図書館</h3>
         <p class="desc">ここに入ってる図書館すべてに対して貸出状況をチェックするで。</p>
         <ul class="lib-list" id="registeredList"></ul>
         <p class="empty-note hidden" id="noLibNote">まだ図書館が登録されてへんで。上の検索から追加してな。</p>
       </div>
- 
+
       <div class="settings-section">
         <h3>4. Google Books APIキー(任意)</h3>
         <p class="desc">本の検索(キーワード検索)は基本キー無しで使えるけど、無料の匿名枠は制限が厳しくてエラー(429)が出ることがある。<a href="https://console.cloud.google.com/apis/library/books.googleapis.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>で無料のAPIキーを発行して貼り付けとくと安定するで(任意)。</p>
@@ -271,9 +266,9 @@ footer a { color: var(--sub); }
     </div>
   </details>
 </div>
- 
+
 <footer>Nozian · 図書館蔵書チェッカー Web版 · 蔵書情報は <a href="https://calil.jp/" target="_blank" rel="noopener noreferrer">カーリル</a> 提供 · 書誌情報は <a href="https://books.google.com/" target="_blank" rel="noopener noreferrer">Google Books</a> 提供</footer>
- 
+
 <script>
 /* ============ ローカル保存 ============ */
 const store = {
@@ -287,7 +282,7 @@ const store = {
   },
   setLibraries: (arr) => localStorage.setItem('calil_libraries', JSON.stringify(arr)),
 };
- 
+
 /* ============ JSONP (カーリルAPIをサーバーレスで直接叩く) ============ */
 /* callbackパラメータだけやとカーリルはデフォルトのXML形式のまま返してくるので、 */
 /* 必ずformat=jsonも一緒に指定して、JSON+JSONPとして返してもらう。 */
@@ -310,13 +305,13 @@ function jsonp(url, params) {
   });
 }
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
- 
+
 async function calilLibrarySearch(appkey, pref, city) {
   const params = { appkey, pref, format: 'json' };
   if (city) params.city = city;
   return jsonp('https://api.calil.jp/library', params);
 }
- 
+
 async function calilCheck(appkey, isbn, systemids) {
   let data = await jsonp('https://api.calil.jp/check', { appkey, isbn, systemid: systemids.join(','), format: 'json' });
   let polls = 0;
@@ -327,14 +322,14 @@ async function calilCheck(appkey, isbn, systemids) {
   }
   return data.books || {};
 }
- 
+
 /* ============ Google Books検索 (関連書籍を探す) ============ */
 async function searchGoogleBooks(keyword) {
   const gbKey = store.getGoogleBooksKey();
   const params = new URLSearchParams({ q: keyword, maxResults: '16', country: 'JP' });
   if (gbKey) params.set('key', gbKey);
   const url = `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
- 
+
   let res = await fetch(url);
   if (res.status === 429) {
     // 一時的な混雑の可能性があるので、1.5秒待って一度だけ自動リトライする
@@ -354,7 +349,7 @@ function extractIsbnFromVolume(volumeInfo) {
   const isbn10 = ids.find((i) => i.type === 'ISBN_10');
   return (isbn13 && isbn13.identifier) || (isbn10 && isbn10.identifier) || null;
 }
- 
+
 /* ============ クイックリンク ============ */
 function buildQuickLinks(title, isbn) {
   const q = encodeURIComponent(title);
@@ -374,7 +369,7 @@ function buildQuickLinks(title, isbn) {
     { label: '読書メーター', url: `https://bookmeter.com/search?keyword=${q}` },
   ];
 }
- 
+
 const STATUS_LABEL = {
   available: { text: '貸出可', cls: 'available' },
   lending: { text: '貸出中', cls: 'lending' },
@@ -390,21 +385,21 @@ function summarizeLibkey(libkeyObj) {
   if (values.some((v) => v.includes('館内'))) return 'instore';
   return 'unknown';
 }
- 
+
 /* ============ UI: APIキー ============ */
 const appkeyInput = document.getElementById('appkeyInput');
 const appkeyStatus = document.getElementById('appkeyStatus');
 const DEFAULT_APPKEY = '72b9f167d9cef58ead4bc9fc80ff9543';
 if (!store.getAppkey()) store.setAppkey(DEFAULT_APPKEY);
 appkeyInput.value = store.getAppkey();
- 
+
 document.getElementById('saveAppkeyBtn').addEventListener('click', () => {
   store.setAppkey(appkeyInput.value.trim());
   appkeyStatus.textContent = '保存したで✓';
   appkeyStatus.className = 'status-msg ok';
   setTimeout(() => appkeyStatus.classList.add('hidden'), 2200);
 });
- 
+
 const gbKeyInput = document.getElementById('gbKeyInput');
 const gbKeyStatus = document.getElementById('gbKeyStatus');
 gbKeyInput.value = store.getGoogleBooksKey();
@@ -415,7 +410,7 @@ document.getElementById('saveGbKeyBtn').addEventListener('click', () => {
   gbKeyStatus.classList.remove('hidden');
   setTimeout(() => gbKeyStatus.classList.add('hidden'), 2200);
 });
- 
+
 /* ============ UI: 図書館検索・登録 ============ */
 const searchResults = document.getElementById('searchResults');
 document.getElementById('searchLibBtn').addEventListener('click', async () => {
@@ -424,7 +419,7 @@ document.getElementById('searchLibBtn').addEventListener('click', async () => {
   const pref = document.getElementById('prefInput').value.trim();
   const city = document.getElementById('cityInput').value.trim();
   if (!pref) { alert('都道府県は入れてな(例: 群馬県)'); return; }
- 
+
   searchResults.innerHTML = '<li class="empty-note">検索中…</li>';
   try {
     const libraries = await calilLibrarySearch(appkey, pref, city);
@@ -433,7 +428,7 @@ document.getElementById('searchLibBtn').addEventListener('click', async () => {
     searchResults.innerHTML = `<li class="empty-note">検索でエラー: ${e.message}</li>`;
   }
 });
- 
+
 function renderSearchResults(libraries) {
   searchResults.innerHTML = '';
   if (libraries.length === 0) {
@@ -443,7 +438,7 @@ function renderSearchResults(libraries) {
   const bySystem = new Map();
   libraries.forEach((lib) => { if (!bySystem.has(lib.systemid)) bySystem.set(lib.systemid, lib); });
   const registered = store.getLibraries();
- 
+
   bySystem.forEach((lib, systemid) => {
     const li = document.createElement('li');
     li.className = 'lib-row';
@@ -465,19 +460,19 @@ function renderSearchResults(libraries) {
     searchResults.appendChild(li);
   });
 }
- 
+
 /* ============ UI: 登録済み一覧 + 設定の折りたたみ状態 ============ */
 const registeredList = document.getElementById('registeredList');
 const noLibNote = document.getElementById('noLibNote');
 const settingsDetails = document.getElementById('settingsDetails');
 const libCountChip = document.getElementById('libCountChip');
- 
+
 function renderRegisteredList() {
   const list = store.getLibraries();
   registeredList.innerHTML = '';
   noLibNote.classList.toggle('hidden', list.length > 0);
   libCountChip.textContent = list.length > 0 ? `登録${list.length}件` : '未登録';
- 
+
   list.forEach((lib) => {
     const li = document.createElement('li');
     li.className = 'lib-row';
@@ -494,23 +489,24 @@ function renderRegisteredList() {
 renderRegisteredList();
 // 初回(図書館が1件も無い)なら開いた状態で出す。登録済みなら畳んでおく。
 settingsDetails.open = store.getLibraries().length === 0;
- 
+
 /* ============ UI: 本を探す(Google Books連携) ============ */
 const bookInput = document.getElementById('bookInput');
 const searchBtn = document.getElementById('searchBtn');
 const bookStatus = document.getElementById('bookStatus');
 const resultsGrid = document.getElementById('resultsGrid');
 const siteTabs = document.getElementById('siteTabs');
- 
+
 // 検索窓のキーワードそのままで、他サイトへ横断的に飛べるタブ(かつての拡張機能と同じ発想)
 function buildSiteTabs(keyword) {
   const q = encodeURIComponent(keyword);
-  return [
-    { label: '図書館 (カーリル)', url: `https://api.calil.jp/openurl?rft.btitle=${q}`, cls: 'tab-calil' },
-    { label: 'Google', url: `https://www.google.com/search?q=${q}`, cls: 'tab-google' },
-    { label: 'Amazon', url: `https://www.amazon.co.jp/s?k=${q}`, cls: 'tab-amazon' },
-    { label: '楽天', url: `https://search.rakuten.co.jp/search/mall/${q}/`, cls: 'tab-rakuten' },
-  ];
+  const base = buildQuickLinks(keyword, null).map((l) => ({
+    label: l.label,
+    url: l.url,
+    cls: l.cls === 'lib' ? 'tab-calil' : '',
+  }));
+  base.splice(1, 0, { label: 'Google', url: `https://www.google.com/search?q=${q}`, cls: '' });
+  return base;
 }
 function renderSiteTabs(keyword) {
   siteTabs.innerHTML = '';
@@ -518,13 +514,13 @@ function renderSiteTabs(keyword) {
   buildSiteTabs(keyword).forEach((t) => {
     const a = document.createElement('a');
     a.href = t.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-    a.className = 'site-tab ' + t.cls;
-    a.innerHTML = `<span class="dot"></span>${t.label}`;
+    a.className = 'site-tab' + (t.cls ? ' ' + t.cls : '');
+    a.textContent = t.label;
     siteTabs.appendChild(a);
   });
   siteTabs.classList.remove('hidden');
 }
- 
+
 function buildQuickLinksRow(title, isbn) {
   const row = document.createElement('div');
   row.className = 'book-quicklinks';
@@ -537,7 +533,7 @@ function buildQuickLinksRow(title, isbn) {
   });
   return row;
 }
- 
+
 function renderAvailability(container, libraries, perLibrary) {
   container.innerHTML = '';
   libraries.forEach((lib) => {
@@ -554,11 +550,11 @@ function renderAvailability(container, libraries, perLibrary) {
     container.appendChild(row);
   });
 }
- 
+
 function renderBookCard(title, authors, thumbUrl, isbn) {
   const card = document.createElement('div');
   card.className = 'book-card';
- 
+
   const coverWrap = document.createElement('div');
   coverWrap.className = 'book-cover-wrap';
   if (thumbUrl) {
@@ -571,24 +567,24 @@ function renderBookCard(title, authors, thumbUrl, isbn) {
     coverWrap.innerHTML = '<span class="no-cover">表紙なし</span>';
   }
   card.appendChild(coverWrap);
- 
+
   const titleEl = document.createElement('div');
   titleEl.className = 'book-title';
   titleEl.textContent = title;
   card.appendChild(titleEl);
- 
+
   if (authors) {
     const a = document.createElement('div');
     a.className = 'book-authors';
     a.textContent = authors;
     card.appendChild(a);
   }
- 
+
   card.appendChild(buildQuickLinksRow(title, isbn));
- 
+
   const availBox = document.createElement('div');
   availBox.className = 'book-avail';
- 
+
   if (isbn) {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -619,30 +615,30 @@ function renderBookCard(title, authors, thumbUrl, isbn) {
     card.appendChild(btn);
   }
   card.appendChild(availBox);
- 
+
   return card;
 }
- 
+
 async function runSearch() {
   const keyword = bookInput.value.trim();
   if (!keyword) return;
- 
+
   renderSiteTabs(keyword);
   resultsGrid.innerHTML = '';
   bookStatus.className = 'status-msg ok';
   bookStatus.textContent = '検索中…';
   bookStatus.classList.remove('hidden');
   searchBtn.disabled = true;
- 
+
   try {
     const items = await searchGoogleBooks(keyword);
     bookStatus.classList.add('hidden');
- 
+
     if (items.length === 0) {
       resultsGrid.innerHTML = `<p class="empty-note">「${keyword}」に一致する本が見つからんかったわ。別のキーワードで試してみてな。</p>`;
       return;
     }
- 
+
     items.forEach((item) => {
       const vi = item.volumeInfo || {};
       const title = vi.title || '(タイトル不明)';
@@ -658,7 +654,7 @@ async function runSearch() {
     searchBtn.disabled = false;
   }
 }
- 
+
 searchBtn.addEventListener('click', runSearch);
 bookInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
 </script>
