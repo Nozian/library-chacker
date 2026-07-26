@@ -242,6 +242,16 @@ footer a { color: var(--sub); }
         <ul class="lib-list" id="registeredList"></ul>
         <p class="empty-note hidden" id="noLibNote">まだ図書館が登録されてへんで。上の検索から追加してな。</p>
       </div>
+ 
+      <div class="settings-section">
+        <h3>4. Google Books APIキー(任意)</h3>
+        <p class="desc">本の検索(キーワード検索)は基本キー無しで使えるけど、無料の匿名枠は制限が厳しくてエラー(429)が出ることがある。<a href="https://console.cloud.google.com/apis/library/books.googleapis.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>で無料のAPIキーを発行して貼り付けとくと安定するで(任意)。</p>
+        <div class="field-row">
+          <input type="text" id="gbKeyInput" placeholder="Google Books APIキー(任意)">
+          <button class="btn secondary" id="saveGbKeyBtn">保存する</button>
+        </div>
+        <div id="gbKeyStatus" class="status-msg hidden"></div>
+      </div>
     </div>
   </details>
 </div>
@@ -253,6 +263,8 @@ footer a { color: var(--sub); }
 const store = {
   getAppkey: () => localStorage.getItem('calil_appkey') || '',
   setAppkey: (v) => localStorage.setItem('calil_appkey', v),
+  getGoogleBooksKey: () => localStorage.getItem('gbooks_key') || '',
+  setGoogleBooksKey: (v) => localStorage.setItem('gbooks_key', v),
   getLibraries: () => {
     try { return JSON.parse(localStorage.getItem('calil_libraries') || '[]'); }
     catch { return []; }
@@ -302,8 +314,20 @@ async function calilCheck(appkey, isbn, systemids) {
  
 /* ============ Google Books検索 (関連書籍を探す) ============ */
 async function searchGoogleBooks(keyword) {
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(keyword)}&maxResults=16&country=JP`;
-  const res = await fetch(url);
+  const gbKey = store.getGoogleBooksKey();
+  const params = new URLSearchParams({ q: keyword, maxResults: '16', country: 'JP' });
+  if (gbKey) params.set('key', gbKey);
+  const url = `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
+ 
+  let res = await fetch(url);
+  if (res.status === 429) {
+    // 一時的な混雑の可能性があるので、1.5秒待って一度だけ自動リトライする
+    await sleep(1500);
+    res = await fetch(url);
+  }
+  if (res.status === 429) {
+    throw new Error('Googleの無料検索枠に一時的に引っかかったわ。1分くらい待つか、下の設定でGoogle Books APIキー(無料)を入れると安定するで。');
+  }
   if (!res.ok) throw new Error('検索でエラーが出たわ (status: ' + res.status + ')');
   const data = await res.json();
   return data.items || [];
@@ -363,6 +387,17 @@ document.getElementById('saveAppkeyBtn').addEventListener('click', () => {
   appkeyStatus.textContent = '保存したで✓';
   appkeyStatus.className = 'status-msg ok';
   setTimeout(() => appkeyStatus.classList.add('hidden'), 2200);
+});
+ 
+const gbKeyInput = document.getElementById('gbKeyInput');
+const gbKeyStatus = document.getElementById('gbKeyStatus');
+gbKeyInput.value = store.getGoogleBooksKey();
+document.getElementById('saveGbKeyBtn').addEventListener('click', () => {
+  store.setGoogleBooksKey(gbKeyInput.value.trim());
+  gbKeyStatus.textContent = '保存したで✓';
+  gbKeyStatus.className = 'status-msg ok';
+  gbKeyStatus.classList.remove('hidden');
+  setTimeout(() => gbKeyStatus.classList.add('hidden'), 2200);
 });
  
 /* ============ UI: 図書館検索・登録 ============ */
