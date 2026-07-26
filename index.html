@@ -6,7 +6,7 @@
 <title>図書館蔵書チェッカー — Nozian</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
-
+ 
 :root {
   --bg: #ffffff;
   --bg-alt: #f5f5f7;
@@ -28,7 +28,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px 100px; }
-
+ 
 nav.topnav {
   position: sticky; top: 0; z-index: 50;
   height: 52px; display: flex; align-items: center;
@@ -38,7 +38,7 @@ nav.topnav {
 nav.topnav a { color: var(--sub); text-decoration: none; font-size: 13.5px; font-weight: 500; }
 nav.topnav a:hover { color: var(--ink); }
 nav.topnav .wordmark { font-weight: 700; font-size: 15px; color: var(--ink); margin-left: auto; }
-
+ 
 header.page-head { padding: 56px 0 36px; }
 header.page-head .eyebrow {
   display: inline-flex; font-size: 13px; font-weight: 600; color: var(--accent);
@@ -46,7 +46,7 @@ header.page-head .eyebrow {
 }
 header.page-head h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
 header.page-head p { color: var(--sub); font-size: 1rem; max-width: 56ch; line-height: 1.7; }
-
+ 
 .card {
   background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
   padding: 28px 26px; margin-bottom: 20px;
@@ -54,7 +54,7 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 56ch; line-h
 .card h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
 .card .desc { color: var(--sub); font-size: 0.9rem; line-height: 1.6; margin-bottom: 18px; }
 .card .desc a { color: var(--accent); }
-
+ 
 .field-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 .field-row input {
   flex: 1; min-width: 120px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;
@@ -69,13 +69,13 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 56ch; line-h
 .btn:disabled { background: var(--sub-faint); cursor: not-allowed; }
 .btn.secondary { background: var(--bg-alt); color: var(--ink); border: 1px solid var(--line); }
 .btn.secondary:hover { background: #eaeaec; }
-
+ 
 .hint { font-size: 12px; color: var(--sub-faint); margin-top: 6px; line-height: 1.6; }
 .status-msg { font-size: 13px; margin-top: 10px; padding: 10px 14px; border-radius: 10px; }
 .status-msg.ok { background: #ebfbee; color: #2b6b34; }
 .status-msg.err { background: #fff0f0; color: #a32424; }
 .status-msg.hidden { display: none; }
-
+ 
 .lib-list { list-style: none; margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
 .lib-row {
   display: flex; justify-content: space-between; align-items: center;
@@ -92,9 +92,9 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 56ch; line-h
 .lib-row .remove-btn { color: #c92a2a; }
 .lib-row .remove-btn:hover { background: #fff0f0; }
 .lib-row .added-label { color: var(--sub-faint); font-size: 12px; }
-
+ 
 .empty-note { color: var(--sub-faint); font-size: 13px; padding: 6px 2px; }
-
+ 
 .book-result { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 18px; }
 .quick-links { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .quick-link {
@@ -103,7 +103,7 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 56ch; line-h
 }
 .quick-link:hover { background: #eaeaec; }
 .quick-link.lib { background: var(--accent-dim); border-color: #a9cdf5; color: var(--accent); font-weight: 700; }
-
+ 
 .avail-list { display: flex; flex-direction: column; gap: 8px; }
 .avail-row {
   display: flex; align-items: center; gap: 10px; padding: 10px 14px;
@@ -118,24 +118,24 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 56ch; line-h
 .avail-status { font-size: 12px; color: var(--sub); }
 .avail-row a.reserve { font-size: 12px; color: var(--accent); text-decoration: none; font-weight: 600; }
 .avail-row a.reserve:hover { text-decoration: underline; }
-
+ 
 footer { text-align: center; padding: 40px 24px; color: var(--sub-faint); font-size: 12.5px; }
 </style>
 </head>
 <body>
-
+ 
 <nav class="topnav">
-  <a href="index.html">← ポートフォリオへ戻る</a>
+  <a href="https://nozian.github.io/nozian-portfolio/">← ポートフォリオへ戻る</a>
   <span class="wordmark">図書館蔵書チェッカー · Web版</span>
 </nav>
-
+ 
 <div class="wrap">
   <header class="page-head">
     <div class="eyebrow">Nozian Tools</div>
     <h1>図書館蔵書チェッカー</h1>
     <p>本のタイトルかISBNを入れるだけで、登録した図書館で借りられるかをチェックできる単体ツール。Chrome拡張機能版と同じカーリルAPIを、このページから直接呼び出しとる。APIキーと図書館の登録内容は、このブラウザの中だけに保存されて外には送らへん。</p>
   </header>
-
+ 
   <section class="card">
     <h2>1. カーリルAPIキー</h2>
     <p class="desc"><a href="https://calil.jp/api/dashboard/" target="_blank" rel="noopener noreferrer">カーリルAPIダッシュボード</a>から無料で発行できる(名前とメールアドレス登録のみ)。発行されたキーをここに貼り付けて。</p>
@@ -146,7 +146,7 @@ footer { text-align: center; padding: 40px 24px; color: var(--sub-faint); font-s
     <div class="hint">保存先はこのブラウザのlocalStorageのみ。どこにも送信されへん。</div>
     <div id="appkeyStatus" class="status-msg hidden"></div>
   </section>
-
+ 
   <section class="card">
     <h2>2. 図書館を探して登録</h2>
     <p class="desc">都道府県(必須)と市区町村(任意)で検索して、チェックしたい図書館を追加してや。</p>
@@ -157,14 +157,14 @@ footer { text-align: center; padding: 40px 24px; color: var(--sub-faint); font-s
     </div>
     <ul class="lib-list" id="searchResults"></ul>
   </section>
-
+ 
   <section class="card">
     <h2>3. 登録済みの図書館</h2>
     <p class="desc">ここに入ってる図書館すべてに対して貸出状況をチェックするで。</p>
     <ul class="lib-list" id="registeredList"></ul>
     <p class="empty-note hidden" id="noLibNote">まだ図書館が登録されてへんで。上の検索から追加してな。</p>
   </section>
-
+ 
   <section class="card">
     <h2>4. 本を検索する</h2>
     <p class="desc">本のタイトル、または10桁のISBNを入力。ISBNを入れると登録図書館ごとの貸出状況まで表示される(タイトルだけやと横断検索リンクのみ)。</p>
@@ -179,9 +179,9 @@ footer { text-align: center; padding: 40px 24px; color: var(--sub-faint); font-s
     </div>
   </section>
 </div>
-
+ 
 <footer>Nozian · 図書館蔵書チェッカー Web版 · 蔵書情報は <a href="https://calil.jp/" target="_blank" rel="noopener noreferrer">カーリル</a> 提供</footer>
-
+ 
 <script>
 /* ============ ローカル保存 ============ */
 const store = {
@@ -193,7 +193,7 @@ const store = {
   },
   setLibraries: (arr) => localStorage.setItem('calil_libraries', JSON.stringify(arr)),
 };
-
+ 
 /* ============ JSONP (カーリルAPIをサーバーレスで直接叩く) ============ */
 /* callbackパラメータを付けると、カーリルはJSONPとして返してくれる。 */
 /* format=jsonは指定したらアカン(プレーンJSONになってscriptタグから実行できひんくなる)。 */
@@ -216,13 +216,13 @@ function jsonp(url, params) {
   });
 }
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
-
+ 
 async function calilLibrarySearch(appkey, pref, city) {
   const params = { appkey, pref };
   if (city) params.city = city;
   return jsonp('https://api.calil.jp/library', params);
 }
-
+ 
 async function calilCheck(appkey, isbn, systemids) {
   let data = await jsonp('https://api.calil.jp/check', { appkey, isbn, systemid: systemids.join(',') });
   let polls = 0;
@@ -233,7 +233,7 @@ async function calilCheck(appkey, isbn, systemids) {
   }
   return data.books || {};
 }
-
+ 
 /* ============ ISBN判定 (ISBN-10のチェックデジット) ============ */
 function isValidIsbn10(code) {
   if (!/^\d{9}[\dXx]$/.test(code)) return false;
@@ -247,19 +247,19 @@ function extractIsbn10(raw) {
   const cleaned = raw.replace(/[-\s]/g, '');
   return isValidIsbn10(cleaned) ? cleaned : null;
 }
-
+ 
 /* ============ UI: セクション1 APIキー ============ */
 const appkeyInput = document.getElementById('appkeyInput');
 const appkeyStatus = document.getElementById('appkeyStatus');
 appkeyInput.value = store.getAppkey();
-
+ 
 document.getElementById('saveAppkeyBtn').addEventListener('click', () => {
   store.setAppkey(appkeyInput.value.trim());
   appkeyStatus.textContent = '保存したで✓';
   appkeyStatus.className = 'status-msg ok';
   setTimeout(() => appkeyStatus.classList.add('hidden'), 2200);
 });
-
+ 
 /* ============ UI: セクション2 図書館検索 ============ */
 const searchResults = document.getElementById('searchResults');
 document.getElementById('searchLibBtn').addEventListener('click', async () => {
@@ -268,7 +268,7 @@ document.getElementById('searchLibBtn').addEventListener('click', async () => {
   const pref = document.getElementById('prefInput').value.trim();
   const city = document.getElementById('cityInput').value.trim();
   if (!pref) { alert('都道府県は入れてな(例: 群馬県)'); return; }
-
+ 
   searchResults.innerHTML = '<li class="empty-note">検索中…</li>';
   try {
     const libraries = await calilLibrarySearch(appkey, pref, city);
@@ -277,7 +277,7 @@ document.getElementById('searchLibBtn').addEventListener('click', async () => {
     searchResults.innerHTML = `<li class="empty-note">検索でエラー: ${e.message}</li>`;
   }
 });
-
+ 
 function renderSearchResults(libraries) {
   searchResults.innerHTML = '';
   if (libraries.length === 0) {
@@ -287,7 +287,7 @@ function renderSearchResults(libraries) {
   const bySystem = new Map();
   libraries.forEach((lib) => { if (!bySystem.has(lib.systemid)) bySystem.set(lib.systemid, lib); });
   const registered = store.getLibraries();
-
+ 
   bySystem.forEach((lib, systemid) => {
     const li = document.createElement('li');
     li.className = 'lib-row';
@@ -307,7 +307,7 @@ function renderSearchResults(libraries) {
     searchResults.appendChild(li);
   });
 }
-
+ 
 /* ============ UI: セクション3 登録済み一覧 ============ */
 const registeredList = document.getElementById('registeredList');
 const noLibNote = document.getElementById('noLibNote');
@@ -329,7 +329,7 @@ function renderRegisteredList() {
   });
 }
 renderRegisteredList();
-
+ 
 /* ============ UI: セクション4 本を検索 ============ */
 function buildQuickLinks(title, isbn10) {
   const q = encodeURIComponent(title);
@@ -349,7 +349,7 @@ function buildQuickLinks(title, isbn10) {
     { label: '読書メーター', url: `https://bookmeter.com/search?keyword=${q}` },
   ];
 }
-
+ 
 const STATUS_LABEL = {
   available: { text: '貸出可', cls: 'available' },
   lending: { text: '貸出中', cls: 'lending' },
@@ -365,22 +365,22 @@ function summarizeLibkey(libkeyObj) {
   if (values.some((v) => v.includes('館内'))) return 'instore';
   return 'unknown';
 }
-
+ 
 const bookStatus = document.getElementById('bookStatus');
 const bookResult = document.getElementById('bookResult');
 const quickLinksBox = document.getElementById('quickLinks');
 const availList = document.getElementById('availList');
 const checkBtn = document.getElementById('checkBookBtn');
-
+ 
 checkBtn.addEventListener('click', async () => {
   const raw = document.getElementById('bookInput').value.trim();
   if (!raw) return;
-
+ 
   bookResult.classList.add('hidden');
   bookStatus.classList.add('hidden');
   quickLinksBox.innerHTML = '';
   availList.innerHTML = '';
-
+ 
   const isbn10 = extractIsbn10(raw);
   buildQuickLinks(raw, isbn10).forEach((l) => {
     const a = document.createElement('a');
@@ -390,10 +390,10 @@ checkBtn.addEventListener('click', async () => {
     quickLinksBox.appendChild(a);
   });
   bookResult.classList.remove('hidden');
-
+ 
   const libraries = store.getLibraries();
   const appkey = store.getAppkey();
-
+ 
   if (!isbn10) {
     bookStatus.textContent = 'タイトル検索は横断リンクのみ表示するで。貸出状況まで見たい場合は10桁のISBNを入れてな。';
     bookStatus.className = 'status-msg ok';
@@ -406,12 +406,12 @@ checkBtn.addEventListener('click', async () => {
     bookStatus.classList.remove('hidden');
     return;
   }
-
+ 
   checkBtn.disabled = true;
   bookStatus.textContent = '図書館に問い合わせ中…(ちょっと時間かかるで)';
   bookStatus.className = 'status-msg ok';
   bookStatus.classList.remove('hidden');
-
+ 
   try {
     const books = await calilCheck(appkey, isbn10, libraries.map((l) => l.systemid));
     const perLibrary = books[isbn10];
