@@ -88,6 +88,8 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 58ch; line-h
 
 .site-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 2px 0 16px; }
 .site-tabs.hidden { display: none; }
+.site-tabs-hint { font-size: 12px; color: var(--sub-faint); margin: 0 0 8px; }
+.site-tabs-hint.hidden { display: none; }
 
 .auto-open-row {
   display: flex; align-items: center; gap: 8px; margin: -4px 0 14px;
@@ -98,12 +100,26 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 58ch; line-h
   background: var(--bg-alt); color: var(--ink); font-size: 12.5px; font-family: inherit;
 }
 .site-tab {
-  display: inline-flex; align-items: center; padding: 9px 18px; border-radius: 100px;
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 100px;
   background: var(--bg-alt); border: 1px solid var(--line); color: var(--ink); text-decoration: none;
   font-size: 13px; font-weight: 600; transition: background 0.15s, transform 0.1s, border-color 0.15s;
 }
 .site-tab:hover { background: #eaeaec; transform: translateY(-1px); }
 .site-tab.tab-calil { background: var(--accent-dim); border-color: #a9cdf5; color: var(--accent); font-weight: 700; }
+.site-tab .tab-hint {
+  font-size: 10.5px; font-weight: 500; color: var(--sub-faint); padding: 1px 7px;
+  background: rgba(0,0,0,0.05); border-radius: 100px;
+}
+.site-tab.tab-calil .tab-hint { color: var(--accent); background: rgba(0,102,204,0.12); }
+
+@media (max-width: 480px) {
+  .wrap { padding: 0 16px 60px; }
+  .card { padding: 20px 18px; }
+  .field-row { flex-direction: column; }
+  .field-row .btn { width: 100%; }
+  .site-tab { font-size: 12.5px; padding: 8px 14px; }
+  .auto-open-row { flex-wrap: wrap; }
+}
 .status-msg { font-size: 13px; margin-top: 10px; padding: 10px 14px; border-radius: 10px; }
 .status-msg.ok { background: #ebfbee; color: #2b6b34; }
 .status-msg.err { background: #fff0f0; color: #a32424; }
@@ -230,6 +246,7 @@ footer a { color: var(--sub); }
         <option value="none">自動で開かない</option>
       </select>
     </div>
+    <div class="site-tabs-hint hidden" id="tabsHint">タップするとその本を各サイトで検索するで</div>
     <div class="site-tabs hidden" id="siteTabs"></div>
     <div id="bookStatus" class="status-msg hidden"></div>
     <div class="avail-list" id="availList"></div>
@@ -351,16 +368,18 @@ function buildQuickLinks(title, isbn) {
     ? `https://api.calil.jp/openurl?rft.isbn=${isbn}`
     : `https://api.calil.jp/openurl?rft.btitle=${q}`;
   return [
-    { label: '図書館', url: calilUrl, cls: 'lib' },
-    { label: 'Amazon', url: `https://www.amazon.co.jp/s?k=${q}` },
-    { label: '楽天ブックス', url: `https://search.rakuten.co.jp/search/mall/${q}/` },
-    { label: '紀伊國屋', url: `https://www.google.com/search?q=site:kinokuniya.co.jp+${q}` },
-    { label: 'honto', url: `https://www.google.com/search?q=site:honto.jp+${q}` },
-    { label: 'ヨドバシ', url: `https://www.yodobashi.com/?word=${q}` },
-    { label: 'ブックオフ', url: `https://www.google.com/search?q=site:shopping.bookoff.co.jp+${q}` },
-    { label: 'バリューブックス', url: `https://www.valuebooks.jp/search?keyword=${q}` },
-    { label: 'メルカリ', url: `https://jp.mercari.com/search?keyword=${q}` },
-    { label: '読書メーター', url: `https://bookmeter.com/search?keyword=${q}` },
+    { label: '図書館', url: calilUrl, cls: 'lib', desc: '図書館の蔵書・貸出状況を検索' },
+    { label: 'Amazon', url: `https://www.amazon.co.jp/s?k=${q}`, desc: 'Amazonで購入検索' },
+    { label: '楽天ブックス', url: `https://search.rakuten.co.jp/search/mall/${q}/`, desc: '楽天市場で購入検索' },
+    { label: '紀伊國屋', url: `https://www.google.com/search?q=site:kinokuniya.co.jp+${q}`, desc: '紀伊國屋書店のサイト内を検索', hint: '書店' },
+    { label: '丸善', url: `https://www.google.com/search?q=site:maruzenjunkudo.co.jp+${q}`, desc: '丸善(丸善ジュンク堂)のサイト内を検索', hint: '書店' },
+    { label: '蔦屋', url: `https://www.google.com/search?q=site:store.tsite.jp+${q}`, desc: '蔦屋書店のサイト内を検索', hint: '書店' },
+    { label: 'honto', url: `https://www.google.com/search?q=site:honto.jp+${q}`, desc: 'hontoのサイト内を検索' },
+    { label: 'ヨドバシ', url: `https://www.yodobashi.com/?word=${q}`, desc: 'ヨドバシ.comで購入検索' },
+    { label: 'ブックオフ', url: `https://www.google.com/search?q=site:shopping.bookoff.co.jp+${q}`, desc: 'ブックオフの中古品を検索' },
+    { label: 'バリューブックス', url: `https://www.valuebooks.jp/search?keyword=${q}`, desc: 'バリューブックスの中古品を検索' },
+    { label: 'メルカリ', url: `https://jp.mercari.com/search?keyword=${q}`, desc: 'メルカリのフリマ出品を検索' },
+    { label: '読書メーター', url: `https://bookmeter.com/search?keyword=${q}`, desc: '読書メーターで感想・レビューを検索', hint: 'レビュー' },
   ];
 }
 
@@ -488,22 +507,39 @@ function buildSiteTabs(keyword, isbn) {
     label: l.label,
     url: l.url,
     cls: l.cls === 'lib' ? 'tab-calil' : '',
+    desc: l.desc,
+    hint: l.hint,
   }));
-  base.splice(1, 0, { label: 'Google', url: `https://www.google.com/search?q=${qBook}`, cls: '' });
-  base.splice(2, 0, { label: 'DuckDuckGo', url: `https://duckduckgo.com/?q=${qBook}`, cls: '' });
+  base.splice(1, 0, { label: 'Google', url: `https://www.google.com/search?q=${qBook}`, cls: '', desc: '「本 図書館」を付けてGoogleで検索' });
+  base.splice(2, 0, { label: 'DuckDuckGo', url: `https://duckduckgo.com/?q=${qBook}`, cls: '', desc: '「本 図書館」を付けてDuckDuckGoで検索' });
   return base;
 }
+const tabsHint = document.getElementById('tabsHint');
 function renderSiteTabs(keyword, isbn) {
   siteTabs.innerHTML = '';
-  if (!keyword) { siteTabs.classList.add('hidden'); return; }
+  if (!keyword) {
+    siteTabs.classList.add('hidden');
+    tabsHint.classList.add('hidden');
+    return;
+  }
   buildSiteTabs(keyword, isbn).forEach((t) => {
     const a = document.createElement('a');
     a.href = t.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
     a.className = 'site-tab' + (t.cls ? ' ' + t.cls : '');
-    a.textContent = t.label;
+    if (t.desc) a.title = t.desc;
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = t.label;
+    a.appendChild(labelSpan);
+    if (t.hint) {
+      const hintSpan = document.createElement('span');
+      hintSpan.className = 'tab-hint';
+      hintSpan.textContent = t.hint;
+      a.appendChild(hintSpan);
+    }
     siteTabs.appendChild(a);
   });
   siteTabs.classList.remove('hidden');
+  tabsHint.classList.remove('hidden');
 }
 
 // 検索ボタンで自動的に開く検索エンジンの選択
