@@ -538,13 +538,13 @@ function renderAvailability(libraries, perLibrary) {
   });
 }
 
-async function runSearch() {
+async function runSearch(withAutoOpen) {
   const raw = bookInput.value.trim();
   if (!raw) return;
 
   const isbn10 = extractIsbn10(raw);
   renderSiteTabs(raw, isbn10);
-  openAutoSearch(raw);
+  if (withAutoOpen) openAutoSearch(raw);
 
   availList.innerHTML = '';
   bookStatus.classList.add('hidden');
@@ -587,8 +587,8 @@ async function runSearch() {
   }
 }
 
-searchBtn.addEventListener('click', runSearch);
-bookInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+searchBtn.addEventListener('click', () => runSearch(true));
+bookInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(false); });
 </script>
 </body>
 </html>
