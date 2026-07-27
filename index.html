@@ -88,6 +88,15 @@ header.page-head p { color: var(--sub); font-size: 1rem; max-width: 58ch; line-h
 
 .site-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 2px 0 16px; }
 .site-tabs.hidden { display: none; }
+
+.auto-open-row {
+  display: flex; align-items: center; gap: 8px; margin: -4px 0 14px;
+  font-size: 12.5px; color: var(--sub);
+}
+.auto-open-row select {
+  padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--bg-alt); color: var(--ink); font-size: 12.5px; font-family: inherit;
+}
 .site-tab {
   display: inline-flex; align-items: center; padding: 9px 18px; border-radius: 100px;
   background: var(--bg-alt); border: 1px solid var(--line); color: var(--ink); text-decoration: none;
@@ -208,14 +217,22 @@ footer a { color: var(--sub); }
 
   <section class="card">
     <h2>本を探す</h2>
-    <p class="desc">気になるキーワードで検索してみてや。関連する本が一覧で出てくるで(Google Books連携)。表紙をタップすると横断検索リンクと、登録図書館の貸出状況チェックボタンが出てくる。</p>
+    <p class="desc">本のタイトルか10桁のISBNを入れてみてや。図書館・Amazon・楽天など横断検索リンクがすぐ出るし、ISBNを入れれば登録図書館ごとの貸出状況までその場でチェックできる。</p>
     <div class="field-row">
       <input type="text" id="bookInput" placeholder="例: 世界史 / 深読み世界史 / 4478024488">
       <button class="btn" id="searchBtn">検索</button>
     </div>
+    <div class="auto-open-row">
+      <label for="autoOpenSelect">検索ボタンで自動的に開く:</label>
+      <select id="autoOpenSelect">
+        <option value="google">Google</option>
+        <option value="duckduckgo">DuckDuckGo</option>
+        <option value="none">自動で開かない</option>
+      </select>
+    </div>
     <div class="site-tabs hidden" id="siteTabs"></div>
     <div id="bookStatus" class="status-msg hidden"></div>
-    <div class="results-grid" id="resultsGrid"></div>
+    <div class="avail-list" id="availList"></div>
   </section>
 
   <details class="settings" id="settingsDetails">
@@ -253,34 +270,24 @@ footer a { color: var(--sub); }
         <ul class="lib-list" id="registeredList"></ul>
         <p class="empty-note hidden" id="noLibNote">まだ図書館が登録されてへんで。上の検索から追加してな。</p>
       </div>
-
-      <div class="settings-section">
-        <h3>4. Google Books APIキー(任意)</h3>
-        <p class="desc">本の検索(キーワード検索)は基本キー無しで使えるけど、無料の匿名枠は制限が厳しくてエラー(429)が出ることがある。<a href="https://console.cloud.google.com/apis/library/books.googleapis.com" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>で無料のAPIキーを発行して貼り付けとくと安定するで(任意)。</p>
-        <div class="field-row">
-          <input type="text" id="gbKeyInput" placeholder="Google Books APIキー(任意)">
-          <button class="btn secondary" id="saveGbKeyBtn">保存する</button>
-        </div>
-        <div id="gbKeyStatus" class="status-msg hidden"></div>
-      </div>
     </div>
   </details>
 </div>
 
-<footer>Nozian · 図書館蔵書チェッカー Web版 · 蔵書情報は <a href="https://calil.jp/" target="_blank" rel="noopener noreferrer">カーリル</a> 提供 · 書誌情報は <a href="https://books.google.com/" target="_blank" rel="noopener noreferrer">Google Books</a> 提供</footer>
+<footer>Nozian · 図書館蔵書チェッカー Web版 · 蔵書情報は <a href="https://calil.jp/" target="_blank" rel="noopener noreferrer">カーリル</a> 提供</footer>
 
 <script>
 /* ============ ローカル保存 ============ */
 const store = {
   getAppkey: () => localStorage.getItem('calil_appkey') || '',
   setAppkey: (v) => localStorage.setItem('calil_appkey', v),
-  getGoogleBooksKey: () => localStorage.getItem('gbooks_key') || '',
-  setGoogleBooksKey: (v) => localStorage.setItem('gbooks_key', v),
   getLibraries: () => {
     try { return JSON.parse(localStorage.getItem('calil_libraries') || '[]'); }
     catch { return []; }
   },
   setLibraries: (arr) => localStorage.setItem('calil_libraries', JSON.stringify(arr)),
+  getAutoOpen: () => localStorage.getItem('auto_open_engine') || 'google',
+  setAutoOpen: (v) => localStorage.setItem('auto_open_engine', v),
 };
 
 /* ============ JSONP (カーリルAPIをサーバーレスで直接叩く) ============ */
@@ -323,31 +330,18 @@ async function calilCheck(appkey, isbn, systemids) {
   return data.books || {};
 }
 
-/* ============ Google Books検索 (関連書籍を探す) ============ */
-async function searchGoogleBooks(keyword) {
-  const gbKey = store.getGoogleBooksKey();
-  const params = new URLSearchParams({ q: keyword, maxResults: '16', country: 'JP' });
-  if (gbKey) params.set('key', gbKey);
-  const url = `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
-
-  let res = await fetch(url);
-  if (res.status === 429) {
-    // 一時的な混雑の可能性があるので、1.5秒待って一度だけ自動リトライする
-    await sleep(1500);
-    res = await fetch(url);
-  }
-  if (res.status === 429) {
-    throw new Error('Googleの無料検索枠に一時的に引っかかったわ。1分くらい待つか、下の設定でGoogle Books APIキー(無料)を入れると安定するで。');
-  }
-  if (!res.ok) throw new Error('検索でエラーが出たわ (status: ' + res.status + ')');
-  const data = await res.json();
-  return data.items || [];
+/* ============ ISBN判定 (ISBN-10のチェックデジット) ============ */
+function isValidIsbn10(code) {
+  if (!/^\d{9}[\dXx]$/.test(code)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += (i + 1) * parseInt(code[i], 10);
+  const last = code[9].toUpperCase();
+  sum += 10 * (last === 'X' ? 10 : parseInt(last, 10));
+  return sum % 11 === 0;
 }
-function extractIsbnFromVolume(volumeInfo) {
-  const ids = (volumeInfo && volumeInfo.industryIdentifiers) || [];
-  const isbn13 = ids.find((i) => i.type === 'ISBN_13');
-  const isbn10 = ids.find((i) => i.type === 'ISBN_10');
-  return (isbn13 && isbn13.identifier) || (isbn10 && isbn10.identifier) || null;
+function extractIsbn10(raw) {
+  const cleaned = raw.replace(/[-\s]/g, '');
+  return isValidIsbn10(cleaned) ? cleaned : null;
 }
 
 /* ============ クイックリンク ============ */
@@ -398,17 +392,6 @@ document.getElementById('saveAppkeyBtn').addEventListener('click', () => {
   appkeyStatus.textContent = '保存したで✓';
   appkeyStatus.className = 'status-msg ok';
   setTimeout(() => appkeyStatus.classList.add('hidden'), 2200);
-});
-
-const gbKeyInput = document.getElementById('gbKeyInput');
-const gbKeyStatus = document.getElementById('gbKeyStatus');
-gbKeyInput.value = store.getGoogleBooksKey();
-document.getElementById('saveGbKeyBtn').addEventListener('click', () => {
-  store.setGoogleBooksKey(gbKeyInput.value.trim());
-  gbKeyStatus.textContent = '保存したで✓';
-  gbKeyStatus.className = 'status-msg ok';
-  gbKeyStatus.classList.remove('hidden');
-  setTimeout(() => gbKeyStatus.classList.add('hidden'), 2200);
 });
 
 /* ============ UI: 図書館検索・登録 ============ */
@@ -490,28 +473,30 @@ renderRegisteredList();
 // 初回(図書館が1件も無い)なら開いた状態で出す。登録済みなら畳んでおく。
 settingsDetails.open = store.getLibraries().length === 0;
 
-/* ============ UI: 本を探す(Google Books連携) ============ */
+/* ============ UI: 本を探す(カーリル直接チェック) ============ */
 const bookInput = document.getElementById('bookInput');
 const searchBtn = document.getElementById('searchBtn');
 const bookStatus = document.getElementById('bookStatus');
-const resultsGrid = document.getElementById('resultsGrid');
+const availList = document.getElementById('availList');
 const siteTabs = document.getElementById('siteTabs');
 
 // 検索窓のキーワードそのままで、他サイトへ横断的に飛べるタブ(かつての拡張機能と同じ発想)
-function buildSiteTabs(keyword) {
+function buildSiteTabs(keyword, isbn) {
   const q = encodeURIComponent(keyword);
-  const base = buildQuickLinks(keyword, null).map((l) => ({
+  const qBook = encodeURIComponent(`${keyword} 本 図書館`);
+  const base = buildQuickLinks(keyword, isbn).map((l) => ({
     label: l.label,
     url: l.url,
     cls: l.cls === 'lib' ? 'tab-calil' : '',
   }));
-  base.splice(1, 0, { label: 'Google', url: `https://www.google.com/search?q=${q}`, cls: '' });
+  base.splice(1, 0, { label: 'Google', url: `https://www.google.com/search?q=${qBook}`, cls: '' });
+  base.splice(2, 0, { label: 'DuckDuckGo', url: `https://duckduckgo.com/?q=${qBook}`, cls: '' });
   return base;
 }
-function renderSiteTabs(keyword) {
+function renderSiteTabs(keyword, isbn) {
   siteTabs.innerHTML = '';
   if (!keyword) { siteTabs.classList.add('hidden'); return; }
-  buildSiteTabs(keyword).forEach((t) => {
+  buildSiteTabs(keyword, isbn).forEach((t) => {
     const a = document.createElement('a');
     a.href = t.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
     a.className = 'site-tab' + (t.cls ? ' ' + t.cls : '');
@@ -521,21 +506,23 @@ function renderSiteTabs(keyword) {
   siteTabs.classList.remove('hidden');
 }
 
-function buildQuickLinksRow(title, isbn) {
-  const row = document.createElement('div');
-  row.className = 'book-quicklinks';
-  buildQuickLinks(title, isbn).slice(0, 5).forEach((l) => {
-    const a = document.createElement('a');
-    a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-    a.className = 'qlink' + (l.cls ? ' ' + l.cls : '');
-    a.textContent = l.label;
-    row.appendChild(a);
-  });
-  return row;
+// 検索ボタンで自動的に開く検索エンジンの選択
+const autoOpenSelect = document.getElementById('autoOpenSelect');
+autoOpenSelect.value = store.getAutoOpen();
+autoOpenSelect.addEventListener('change', () => store.setAutoOpen(autoOpenSelect.value));
+
+function openAutoSearch(keyword) {
+  const engine = store.getAutoOpen();
+  if (engine === 'none') return;
+  const qBook = encodeURIComponent(`${keyword} 本 図書館`);
+  const url = engine === 'duckduckgo'
+    ? `https://duckduckgo.com/?q=${qBook}`
+    : `https://www.google.com/search?q=${qBook}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-function renderAvailability(container, libraries, perLibrary) {
-  container.innerHTML = '';
+function renderAvailability(libraries, perLibrary) {
+  availList.innerHTML = '';
   libraries.forEach((lib) => {
     const entry = perLibrary && perLibrary[lib.systemid];
     const statusKey = (!entry || entry.status === 'Error') ? 'unknown' : summarizeLibkey(entry.libkey);
@@ -547,108 +534,53 @@ function renderAvailability(container, libraries, perLibrary) {
       <span class="avail-name">${lib.name}</span>
       <span class="avail-status">${label.text}</span>
       ${entry && entry.reserveurl ? `<a class="reserve" href="${entry.reserveurl}" target="_blank" rel="noopener noreferrer">予約へ</a>` : ''}`;
-    container.appendChild(row);
+    availList.appendChild(row);
   });
 }
 
-function renderBookCard(title, authors, thumbUrl, isbn) {
-  const card = document.createElement('div');
-  card.className = 'book-card';
-
-  const coverWrap = document.createElement('div');
-  coverWrap.className = 'book-cover-wrap';
-  if (thumbUrl) {
-    const img = document.createElement('img');
-    img.src = thumbUrl.replace('http://', 'https://');
-    img.alt = title;
-    img.loading = 'lazy';
-    coverWrap.appendChild(img);
-  } else {
-    coverWrap.innerHTML = '<span class="no-cover">表紙なし</span>';
-  }
-  card.appendChild(coverWrap);
-
-  const titleEl = document.createElement('div');
-  titleEl.className = 'book-title';
-  titleEl.textContent = title;
-  card.appendChild(titleEl);
-
-  if (authors) {
-    const a = document.createElement('div');
-    a.className = 'book-authors';
-    a.textContent = authors;
-    card.appendChild(a);
-  }
-
-  card.appendChild(buildQuickLinksRow(title, isbn));
-
-  const availBox = document.createElement('div');
-  availBox.className = 'book-avail';
-
-  if (isbn) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'book-check-btn';
-    btn.textContent = '図書館で調べる';
-    btn.addEventListener('click', async () => {
-      const libraries = store.getLibraries();
-      const appkey = store.getAppkey();
-      if (!appkey || libraries.length === 0) {
-        availBox.innerHTML = '<div class="hint">先に下の「図書館の設定」でAPIキーと図書館を登録してな。</div>';
-        settingsDetails.open = true;
-        settingsDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
-      btn.disabled = true;
-      btn.textContent = '確認中…';
-      try {
-        const books = await calilCheck(appkey, isbn, libraries.map((l) => l.systemid));
-        renderAvailability(availBox, libraries, books[isbn]);
-        btn.textContent = '再確認';
-      } catch (e) {
-        availBox.innerHTML = `<div class="hint">エラー: ${e.message}</div>`;
-        btn.textContent = 'もう一度試す';
-      } finally {
-        btn.disabled = false;
-      }
-    });
-    card.appendChild(btn);
-  }
-  card.appendChild(availBox);
-
-  return card;
-}
-
 async function runSearch() {
-  const keyword = bookInput.value.trim();
-  if (!keyword) return;
+  const raw = bookInput.value.trim();
+  if (!raw) return;
 
-  renderSiteTabs(keyword);
-  resultsGrid.innerHTML = '';
-  bookStatus.className = 'status-msg ok';
-  bookStatus.textContent = '検索中…';
-  bookStatus.classList.remove('hidden');
+  const isbn10 = extractIsbn10(raw);
+  renderSiteTabs(raw, isbn10);
+  openAutoSearch(raw);
+
+  availList.innerHTML = '';
+  bookStatus.classList.add('hidden');
+
+  if (!isbn10) {
+    bookStatus.textContent = '横断検索リンクを表示したで。貸出状況まで見たい場合は10桁のISBNを入れてな。';
+    bookStatus.className = 'status-msg ok';
+    bookStatus.classList.remove('hidden');
+    return;
+  }
+
+  const libraries = store.getLibraries();
+  const appkey = store.getAppkey();
+  if (!appkey || libraries.length === 0) {
+    bookStatus.textContent = 'ISBNは認識できたけど、貸出状況を見るには下の「図書館の設定」でAPIキーと図書館登録が必要やで。';
+    bookStatus.className = 'status-msg ok';
+    bookStatus.classList.remove('hidden');
+    return;
+  }
+
   searchBtn.disabled = true;
+  bookStatus.textContent = '図書館に問い合わせ中…(ちょっと時間かかるで)';
+  bookStatus.className = 'status-msg ok';
+  bookStatus.classList.remove('hidden');
 
   try {
-    const items = await searchGoogleBooks(keyword);
-    bookStatus.classList.add('hidden');
-
-    if (items.length === 0) {
-      resultsGrid.innerHTML = `<p class="empty-note">「${keyword}」に一致する本が見つからんかったわ。別のキーワードで試してみてな。</p>`;
+    const books = await calilCheck(appkey, isbn10, libraries.map((l) => l.systemid));
+    const perLibrary = books[isbn10];
+    if (!perLibrary) {
+      bookStatus.textContent = '応答はあったけど、該当データが見つからんかったわ。';
       return;
     }
-
-    items.forEach((item) => {
-      const vi = item.volumeInfo || {};
-      const title = vi.title || '(タイトル不明)';
-      const authors = (vi.authors || []).join('・');
-      const thumb = vi.imageLinks && (vi.imageLinks.thumbnail || vi.imageLinks.smallThumbnail);
-      const isbn = extractIsbnFromVolume(vi);
-      resultsGrid.appendChild(renderBookCard(title, authors, thumb, isbn));
-    });
+    renderAvailability(libraries, perLibrary);
+    bookStatus.classList.add('hidden');
   } catch (e) {
-    bookStatus.textContent = '検索でエラー: ' + e.message;
+    bookStatus.textContent = 'カーリルAPIとの通信でエラー: ' + e.message;
     bookStatus.className = 'status-msg err';
   } finally {
     searchBtn.disabled = false;
