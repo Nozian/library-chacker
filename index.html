@@ -233,7 +233,7 @@ footer a { color: var(--sub); }
 
   <section class="card">
     <h2>本を探す</h2>
-    <p class="desc">本のタイトルか10桁のISBNを入れてみてや。図書館・Amazon・楽天など横断検索リンクがすぐ出るし、ISBNを入れれば登録図書館ごとの貸出状況までその場でチェックできる。</p>
+    <p class="desc">本のタイトルを入れると、関連する本が表紙付きで一覧表示される(Open Library連携)。カードの中の「図書館で調べる」を押せば、登録図書館の貸出状況もその場でチェックできる。10桁のISBNを直接入れてもOK。</p>
     <div class="field-row">
       <input type="text" id="bookInput" placeholder="例: 世界史 / 深読み世界史 / 4478024488">
       <button class="btn" id="searchBtn">検索</button>
@@ -250,6 +250,7 @@ footer a { color: var(--sub); }
     <div class="site-tabs hidden" id="siteTabs"></div>
     <div id="bookStatus" class="status-msg hidden"></div>
     <div class="avail-list" id="availList"></div>
+    <div class="results-grid" id="resultsGrid"></div>
   </section>
 
   <details class="settings" id="settingsDetails">
@@ -497,6 +498,7 @@ const bookInput = document.getElementById('bookInput');
 const searchBtn = document.getElementById('searchBtn');
 const bookStatus = document.getElementById('bookStatus');
 const availList = document.getElementById('availList');
+const resultsGrid = document.getElementById('resultsGrid');
 const siteTabs = document.getElementById('siteTabs');
 
 // 検索窓のキーワードそのままで、他サイトへ横断的に飛べるタブ(かつての拡張機能と同じ発想)
@@ -574,6 +576,111 @@ function renderAvailability(libraries, perLibrary) {
   });
 }
 
+/* ============ Open Library検索 (Googleを使わない関連書籍検索) ============ */
+async function searchOpenLibrary(keyword) {
+  const params = new URLSearchParams({
+    q: keyword,
+    limit: '24',
+    fields: 'title,author_name,isbn,cover_i',
+  });
+  const res = await fetch(`https://openlibrary.org/search.json?${params.toString()}`);
+  if (!res.ok) throw new Error('検索でエラーが出たわ (status: ' + res.status + ')');
+  const data = await res.json();
+  return data.docs || [];
+}
+
+function pickIsbnFromDoc(doc) {
+  const isbns = (doc.isbn || []).map((x) => x.replace(/[-\s]/g, ''));
+  const isbn10 = isbns.find((x) => /^\d{9}[\dXx]$/.test(x));
+  if (isbn10) return isbn10;
+  const isbn13 = isbns.find((x) => /^\d{13}$/.test(x));
+  return isbn13 || null;
+}
+
+function renderResultCard(title, authors, coverId, isbn) {
+  const card = document.createElement('div');
+  card.className = 'book-card';
+
+  const coverWrap = document.createElement('div');
+  coverWrap.className = 'book-cover-wrap';
+  if (coverId) {
+    const img = document.createElement('img');
+    img.src = `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`;
+    img.alt = title;
+    img.loading = 'lazy';
+    coverWrap.appendChild(img);
+  } else {
+    coverWrap.innerHTML = '<span class="no-cover">表紙なし</span>';
+  }
+  card.appendChild(coverWrap);
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'book-title';
+  titleEl.textContent = title;
+  card.appendChild(titleEl);
+
+  if (authors) {
+    const a = document.createElement('div');
+    a.className = 'book-authors';
+    a.textContent = authors;
+    card.appendChild(a);
+  }
+
+  const cardAvail = document.createElement('div');
+  cardAvail.className = 'book-avail';
+
+  if (isbn) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'book-check-btn';
+    btn.textContent = '図書館で調べる';
+    btn.addEventListener('click', async () => {
+      const libraries = store.getLibraries();
+      const appkey = store.getAppkey();
+      if (!appkey || libraries.length === 0) {
+        cardAvail.innerHTML = '<div class="hint">先に下の「図書館の設定」でAPIキーと図書館を登録してな。</div>';
+        settingsDetails.open = true;
+        settingsDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = '確認中…';
+      try {
+        const books = await calilCheck(appkey, isbn, libraries.map((l) => l.systemid));
+        cardAvail.innerHTML = '';
+        libraries.forEach((lib) => {
+          const entry = books[isbn] && books[isbn][lib.systemid];
+          const statusKey = (!entry || entry.status === 'Error') ? 'unknown' : summarizeLibkey(entry.libkey);
+          const label = STATUS_LABEL[statusKey] || STATUS_LABEL.unknown;
+          const row = document.createElement('div');
+          row.className = 'avail-row';
+          row.innerHTML = `
+            <span class="avail-dot ${label.cls}"></span>
+            <span class="avail-name">${lib.name}</span>
+            <span class="avail-status">${label.text}</span>
+            ${entry && entry.reserveurl ? `<a class="reserve" href="${entry.reserveurl}" target="_blank" rel="noopener noreferrer">予約へ</a>` : ''}`;
+          cardAvail.appendChild(row);
+        });
+        btn.textContent = '再確認';
+      } catch (e) {
+        cardAvail.innerHTML = `<div class="hint">エラー: ${e.message}</div>`;
+        btn.textContent = 'もう一度試す';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    card.appendChild(btn);
+  } else {
+    const note = document.createElement('div');
+    note.className = 'hint';
+    note.textContent = 'ISBN情報なし(貸出チェック不可)';
+    card.appendChild(note);
+  }
+  card.appendChild(cardAvail);
+
+  return card;
+}
+
 async function runSearch(withAutoOpen) {
   const raw = bookInput.value.trim();
   if (!raw) return;
@@ -583,12 +690,32 @@ async function runSearch(withAutoOpen) {
   if (withAutoOpen) openAutoSearch(raw);
 
   availList.innerHTML = '';
+  resultsGrid.innerHTML = '';
   bookStatus.classList.add('hidden');
 
   if (!isbn10) {
-    bookStatus.textContent = '横断検索リンクを表示したで。貸出状況まで見たい場合は10桁のISBNを入れてな。';
+    bookStatus.textContent = '本を検索中…';
     bookStatus.className = 'status-msg ok';
     bookStatus.classList.remove('hidden');
+    searchBtn.disabled = true;
+    try {
+      const docs = await searchOpenLibrary(raw);
+      bookStatus.classList.add('hidden');
+      if (docs.length === 0) {
+        resultsGrid.innerHTML = `<p class="empty-note">「${raw}」に一致する本が見つからんかったわ(日本語の本はOpen Libraryやと網羅性が弱いことがある)。上のタブから他サイトも見てみてな。</p>`;
+      } else {
+        docs.forEach((doc) => {
+          const title = doc.title || '(タイトル不明)';
+          const authors = (doc.author_name || []).join('・');
+          resultsGrid.appendChild(renderResultCard(title, authors, doc.cover_i, pickIsbnFromDoc(doc)));
+        });
+      }
+    } catch (e) {
+      bookStatus.textContent = '検索でエラー: ' + e.message;
+      bookStatus.className = 'status-msg err';
+    } finally {
+      searchBtn.disabled = false;
+    }
     return;
   }
 
